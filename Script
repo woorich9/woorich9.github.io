@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Minecraft Server Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 600px; width: 100%; background: #000; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script>
+        // 1. Tell Leaflet to use a flat, simple pixel grid instead of a globe
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -3 // Allows zooming out past the original image size
+        });
+
+        // 2. Define the dimensions of your custom map image (Width x Height in pixels)
+        const mapWidth = 2048;
+        const mapHeight = 2048;
+        const imageBounds = [[0, 0], [mapHeight, mapWidth]];
+
+        // 3. Load your custom map image
+        // Replace 'MRT-basemap.png.png' with the path to your image
+        L.imageOverlay('MRT-basemap.png.png', imageBounds).addTo(map);
+
+        // Tell Leaflet the total size of the map area
+        map.fitBounds(imageBounds);
+
+        // 4. Helper function to convert Minecraft (X, Z) coordinates to Leaflet points
+        // Adjust the offsets depending on where (0,0) is located on your image
+        function getMapLatLng(minecraftX, minecraftZ) {
+            // In L.CRS.Simple, coordinates are mapped as [Y, X] (or [Z, X] for Minecraft)
+            // Example configuration if the center of your image is Minecraft 0,0:
+            const centerX = mapWidth / 2;
+            const centerZ = mapHeight / 2;
+            
+            const mapX = centerX + minecraftX;
+            const mapZ = centerZ - minecraftZ; // Inverted because Z goes south in MC but Y goes down in pixels
+            
+            return [mapZ, mapX];
+        }
+
+        // 5. Add custom interactive markers using Minecraft coordinates
+        const spawnPoint = getMapLatLng(0, 0);
+        L.marker(spawnPoint).addTo(map)
+            .bindPopup('<b>World Spawn</b><br>Coordinates: 0, 0');
+
+        const diamondMine = getMapLatLng(450, -200);
+        L.marker(diamondMine).addTo(map)
+            .bindPopup('<b>Main Diamond Mine</b><br>Coordinates: 450, -200');
+            
+    </script>
+</body>
+</html>
